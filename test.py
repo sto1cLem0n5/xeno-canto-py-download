@@ -35,8 +35,10 @@ class TestCases(unittest.TestCase):
         asyncio.run(download(['gen:Otis']))
         asyncio.run(download(['Bearded Bellbird', 'q:A', 'cnt:Brazil']))
         purge(7)
-        self.assertFalse(os.path.exists('dataset/audio/GreatBustard/'))
+        b = self.assertFalse(os.path.exists('dataset/audio/GreatBustard/'))
         self.assertTrue(os.path.exists('dataset/audio/BeardedBellbird/'))
+        asyncio.sleep(.25)
+        return b
 
     # Check if metadata is being correctly generated for one
     # recording with metadata already saved
@@ -66,6 +68,7 @@ class TestCases(unittest.TestCase):
                                        '493159.mp3'))
         asyncio.run(download(['gen:Otis']))
         self.assertTrue(os.path.exists('dataset/audio/GreatBustard/'))
+        # delete(['gen:Otis'])
         delete(['id:493159', 'gen:Otis'])
         self.assertFalse(os.path.exists('dataset/audio/BeardedBellbird/'
                                         '493159.mp3'))
@@ -83,7 +86,48 @@ class TestCases(unittest.TestCase):
 
     # Removes files used in testing
     def tearDown(self):
+        print(("TEAR_DOWN"))
         try:
             shutil.rmtree('dataset/')
         except OSError:
             pass
+
+"""fix yelling at me error"""
+from functools import wraps
+
+from asyncio.proactor_events import _ProactorBasePipeTransport
+
+
+def silence_event_loop_closed(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except RuntimeError as e:
+            if str(e) != 'Event loop is closed':
+                raise
+
+    return wrapper
+
+_ProactorBasePipeTransport.__del__ = silence_event_loop_closed(_ProactorBasePipeTransport.__del__)
+"""fix yelling at me error end"""
+
+def main():
+    # test
+    test = TestCases()
+    # test.test_conn()
+    # test.test_metadata()
+    # test.test_download()
+    # test.test_purge()
+    # test.test_gen_meta_with_extra_metadata()
+    # test.test_delete()
+    # test.tearDown()
+    # test.test_delete_multiple_species()
+    # test.test_gen_meta_with_extra_tracks()
+    test.tearDown()
+
+
+if __name__ == "__main__":
+   main()
+
+

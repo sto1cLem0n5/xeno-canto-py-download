@@ -174,6 +174,7 @@ async def download(filt, num_chunks=4):
 
     # Retrieve metadata and generate list of track information
     meta_path = metadata(filt)
+    print(meta_path)
     url_list = list_urls(meta_path)
 
     # Retrieve the number of recordings to be downloaded
